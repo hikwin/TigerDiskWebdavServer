@@ -1,0 +1,116 @@
+# 保护敏感文件
+<Files ~ "^\.">
+    Require all denied
+</Files>
+
+# 保护配置文件
+<Files "config.php">
+    Require all denied
+</Files>
+
+# 保护数据库文件
+<FilesMatch "\.db$">
+    Require all denied
+</FilesMatch>
+
+# 保护日志文件
+<FilesMatch "\.log$">
+    Require all denied
+</FilesMatch>
+
+# 安全优化：防止常见攻击
+# 防止目录遍历攻击
+RewriteCond %{THE_REQUEST} \.\./ [NC]
+RewriteRule ^ - [F,L]
+
+# 防止直接访问敏感文件
+<FilesMatch "\.(ini|conf|bak|backup|sql|git|svn|htaccess|htpasswd)$">
+    Require all denied
+</FilesMatch>
+
+# 防止访问版本控制目录
+<IfModule mod_rewrite.c>
+    RewriteRule ^\.git/ - [F,L]
+    RewriteRule ^\.svn/ - [F,L]
+    RewriteRule ^\.hg/ - [F,L]
+</IfModule>
+
+# 启用URL重写（移到前面，确保所有rewrite规则生效）
+RewriteEngine On
+
+# 修复Apache下Authorization头无法获取的问题
+# 确保WebDAV基本认证能正常工作
+SetEnvIf Authorization .+ HTTP_AUTHORIZATION=$0
+
+# 保护storage目录（禁止直接访问任何文件）- 最高优先级保护
+# 这些规则必须放在所有其他规则之前，确保首先执行
+
+# 核心规则：绝对阻止所有对storage目录的访问
+RewriteRule ^storage/?$ - [F,L]
+RewriteRule ^storage/.*$ - [F,L]
+
+# 特殊规则：确保storage目录下的所有文件都不能直接访问
+RewriteCond %{REQUEST_URI} /storage/ [NC]
+RewriteRule !^storage/index\.php$ - [F,L]
+
+# 严格规则：任何包含/storage/的URI都被阻止
+RewriteCond %{REQUEST_URI} /storage/ [NC,OR]
+RewriteCond %{REQUEST_URI} /storage$ [NC]
+RewriteRule ^.*$ - [F,L]
+
+# FilesMatch保护：阻止storage目录下的所有文件访问
+<FilesMatch "^storage/.*$">
+    Require all denied
+</FilesMatch>
+
+# 阻止访问storage目录下的特定文件类型
+<FilesMatch "\.(md|txt|pdf|doc|docx|xls|xlsx|jpg|jpeg|png|gif|bmp|zip|rar|mp3|mp4|avi|mov|wmv|php|js|css|html|json|xml|sql|log|ini|conf|bak|backup|tmp|temp|cache|session|db)$">
+    <If "%{REQUEST_URI} =~ /storage/">
+        Require all denied
+    </If>
+</FilesMatch>
+
+# 设置基础路径（自动检测子目录）
+# 如果安装在子目录，会自动检测并设置正确的RewriteBase
+RewriteCond %{REQUEST_URI}::$1 ^(.*?/)(.*)::\2$
+RewriteRule ^(.*)$ - [E=BASE:%1]
+
+# 性能优化：设置缓存头
+<IfModule mod_expires.c>
+    ExpiresActive On
+    # CSS和JS文件缓存1个月
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    # 图片文件缓存1个月
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    # 字体文件缓存1个月
+    ExpiresByType font/woff "access plus 1 month"
+    ExpiresByType font/woff2 "access plus 1 month"
+    ExpiresByType application/font-woff "access plus 1 month"
+</IfModule>
+
+# 性能优化：设置压缩
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript application/javascript application/json application/xml
+</IfModule>
+
+# 处理WebDAV访问 - 支持子目录安装
+RewriteCond %{REQUEST_URI} .*/webdav/?$
+RewriteRule webdav/?$ webdav.php [L]
+
+# 处理文件列表访问 - 支持子目录安装
+RewriteCond %{REQUEST_URI} .*/file_list\.php$
+RewriteRule file_list\.php$ file_list.php [L]
+
+# 特殊处理WebDAV认证请求 - 确保认证头能正确传递
+RewriteCond %{REQUEST_METHOD} ^(OPTIONS|PROPFIND|PROPPATCH|PUT|DELETE|MKCOL|COPY|MOVE)$ [NC]
+RewriteRule ^webdav\.php$ webdav.php [L,E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# 处理WebDAV请求 - 支持子目录安装（最后处理，确保前面的规则优先）
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ webdav.php [QSA,L]

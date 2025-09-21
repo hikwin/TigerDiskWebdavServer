@@ -1,0 +1,219 @@
+/* WebDAV在线浏览样式 */
+
+/* 基础样式 */
+body { 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    margin: 0; 
+    padding: 20px; 
+    background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* 用户信息 */
+.user-info {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-size: 14px;
+}
+
+.user-info span {
+    color: #333;
+    margin-right: 10px;
+}
+
+.logout-link {
+    color: #dc3545;
+    text-decoration: none;
+    padding: 5px 10px;
+    border: 1px solid #dc3545;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.logout-link:hover {
+    background: #dc3545;
+    color: white;
+}
+
+/* 标题 */
+h1 { 
+    color: #333; 
+    margin-bottom: 20px;
+    font-size: 24px;
+    word-break: break-word;
+}
+
+/* 导航 */
+.navigation { 
+    margin-bottom: 15px; 
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.navigation a { 
+    padding: 4px 8px; 
+    background-color: #f0f0f0; 
+    text-decoration: none; 
+    border-radius: 3px; 
+    color: #0066cc;
+    font-size: 13px;
+    transition: background-color 0.2s;
+    border: 1px solid #ddd;
+}
+
+.navigation a:hover { 
+    background-color: #e0e0e0; 
+}
+
+/* 表格 */
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+th, td { 
+    padding: 12px; 
+    text-align: left; 
+    border-bottom: 1px solid #eee; 
+}
+
+th { 
+    background-color: #f8f9fa; 
+    font-weight: 600;
+    color: #495057;
+}
+
+tr:hover {
+    background-color: #f8f9fa;
+}
+
+a { 
+    text-decoration: none; 
+    color: #0066cc; 
+}
+
+a:hover { 
+    text-decoration: underline; 
+}
+
+.folder { 
+    color: #0066cc; 
+    font-weight: 600; 
+}
+
+.file { 
+    color: #333; 
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    h1 {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+    
+    .user-info {
+        position: relative;
+        top: 0;
+        right: 0;
+        margin-bottom: 15px;
+        text-align: right;
+    }
+    
+    .navigation {
+        flex-direction: row;
+        gap: 8px;
+        flex-wrap: nowrap;
+    }
+    
+    .navigation a {
+        flex: 1;
+        text-align: center;
+        padding: 6px 8px;
+        font-size: 13px;
+        min-height: auto;
+        white-space: nowrap;
+    }
+    
+    table {
+        font-size: 12px;
+        border-radius: 0;
+        box-shadow: none;
+    }
+    
+    th, td {
+        padding: 6px 4px;
+    }
+    
+    th:nth-child(2), td:nth-child(2) {
+        font-size: 10px;
+        white-space: nowrap;
+    }
+    
+    th:last-child, td:last-child {
+        font-size: 10px;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 8px;
+    }
+    
+    h1 {
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+    
+    .navigation a {
+        padding: 5px 6px;
+        font-size: 12px;
+    }
+    
+    table {
+        font-size: 11px;
+        min-width: 100%;
+    }
+    
+    th, td {
+        padding: 4px 3px;
+        font-size: 10px;
+    }
+    
+    table {
+        display: table;
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 360px) {
+    .navigation a {
+        padding: 4px 5px;
+        font-size: 11px;
+    }
+    
+    table {
+        font-size: 10px;
+    }
+    
+    th, td {
+        padding: 3px 2px;
+        font-size: 9px;
+    }
+}

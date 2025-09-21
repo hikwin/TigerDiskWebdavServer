@@ -1,0 +1,99 @@
+/**
+ * File List Module Modal Styles
+ * 文件列表模块模态框样式
+ */
+
+/* Toast提示样式 */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    background: #333;
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 1002;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+    font-size: 14px;
+    max-width: 300px;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast.success {
+    background: #28a745;
+}
+
+.toast.error {
+    background: #dc3545;
+}
+
+.toast.warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+/* Markdown预览样式 */
+#previewContent h1, #previewContent h2, #previewContent h3, 
+#previewContent h4, #previewContent h5, #previewContent h6 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    font-weight: 600;
+}
+#previewContent h1 { font-size: 2em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+#previewContent h2 { font-size: 1.5em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+#previewContent h3 { font-size: 1.25em; }
+#previewContent p { margin: 0.5em 0; }
+#previewContent ul, #previewContent ol { margin: 0.5em 0; padding-left: 2em; }
+#previewContent li { margin: 0.25em 0; }
+#previewContent code {
+    background: #f3f4f6;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: 'Consolas', 'Monaco', 'Lucida Console', monospace;
+    font-size: 0.85em;
+}
+#previewContent pre {
+    background: #f8f9fa;
+    padding: 1em;
+    border-radius: 6px;
+    overflow-x: auto;
+    border: 1px solid #e9ecef;
+}
+#previewContent pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.9em;
+}
+#previewContent blockquote {
+    border-left: 4px solid #dfe2e5;
+    padding-left: 1em;
+    margin: 1em 0;
+    color: #6a737d;
+}
+#previewContent table {
+    border-collapse: collapse;
+    margin: 1em 0;
+    width: 100%;
+}
+#previewContent th, #previewContent td {
+    border: 1px solid #dfe2e5;
+    padding: 0.5em 0.75em;
+}
+#previewContent th {
+    background: #f6f8fa;
+    font-weight: 600;
+}
+#previewContent a {
+    color: #0366d6;
+    text-decoration: none;
+}
+#previewContent a:hover {
+    text-decoration: underline;
+}
