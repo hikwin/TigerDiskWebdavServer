@@ -453,7 +453,7 @@ $username = $isLoggedIn ? $_SESSION['username'] : '';
         </p>
         
         <div class="hero-buttons fade-in-up">
-            <a href="https://github.com/tigerdisk/webdav-server" class="btn btn-primary btn-large" target="_blank">
+            <a href="https://github.com/hikwin/TigerDiskWebdavServer" class="btn btn-primary btn-large" target="_blank">
                 <i class="fab fa-github"></i>
                 源码下载
             </a>
@@ -533,7 +533,7 @@ $username = $isLoggedIn ? $_SESSION['username'] : '';
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-links">
-                <a href="https://github.com/tigerdisk/webdav-server" class="footer-link" target="_blank">
+                <a href="https://github.com/hikwin/TigerDiskWebdavServer" class="footer-link" target="_blank">
                     <i class="fab fa-github"></i> GitHub
                 </a>
                 <a href="webdav.php" class="footer-link">

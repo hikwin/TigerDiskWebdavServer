@@ -112,6 +112,56 @@ class WebDAVServer {
                 return;
             }
             
+            // 处理上传配置获取请求
+            if (isset($_GET['get_upload_config'])) {
+                header('Content-Type: application/json; charset=utf-8');
+                
+                // 获取PHP上传限制配置
+                $uploadMaxFilesize = ini_get('upload_max_filesize');
+                $postMaxSize = ini_get('post_max_size');
+                
+                // 将PHP配置值转换为字节数
+                function convertToBytes($value) {
+                    $value = trim($value);
+                    $last = strtolower($value[strlen($value) - 1]);
+                    $value = (int)$value;
+                    
+                    switch($last) {
+                        case 'g':
+                            $value *= 1024;
+                        case 'm':
+                            $value *= 1024;
+                        case 'k':
+                            $value *= 1024;
+                    }
+                    
+                    return $value;
+                }
+                
+                $uploadMaxBytes = convertToBytes($uploadMaxFilesize);
+                $postMaxBytes = convertToBytes($postMaxSize);
+                
+                // 实际限制取两者中的较小值
+                $actualLimit = min($uploadMaxBytes, $postMaxBytes);
+                
+                // 转换为MB显示
+                $uploadMaxMB = round($uploadMaxBytes / (1024 * 1024), 2);
+                $postMaxMB = round($postMaxBytes / (1024 * 1024), 2);
+                $actualLimitMB = round($actualLimit / (1024 * 1024), 2);
+                
+                echo json_encode([
+                    'upload_max_filesize' => $uploadMaxFilesize,
+                    'post_max_size' => $postMaxSize,
+                    'upload_max_bytes' => $uploadMaxBytes,
+                    'post_max_bytes' => $postMaxBytes,
+                    'actual_limit_bytes' => $actualLimit,
+                    'upload_max_mb' => $uploadMaxMB,
+                    'post_max_mb' => $postMaxMB,
+                    'actual_limit_mb' => $actualLimitMB
+                ]);
+                return;
+            }
+            
             // 处理文件删除请求
             if (isset($_POST['delete'])) {
                 $filePath = $_POST['delete'];

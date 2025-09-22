@@ -254,7 +254,7 @@ class FileListModule {
                 <div class="header-content">
                     <div class="title-section">
                         <h1>文件浏览器</h1>
-                        <button type="button" class="upload-btn" onclick="document.getElementById('uploadModal').style.display='block'">上传文件</button>
+                        <button type="button" class="upload-btn" onclick="openUploadModal()">上传文件</button>
                     </div>
                     <div class="user-info">
                         <span>👤 <?php echo $username; ?></span>
@@ -349,13 +349,13 @@ class FileListModule {
                 <div class="modal-content">
                     <div class="modal-header">
                         <h3>上传文件</h3>
-                        <span class="close" onclick="document.getElementById('uploadModal').style.display='none'">&times;</span>
+                        <span class="close" onclick="resetUploadModal()">&times;</span>
                     </div>
                     <form id="uploadForm" enctype="multipart/form-data">
                         <input type="file" name="file" id="fileInput" class="file-input">
                         <div class="modal-buttons">
                             <button type="submit" class="btn btn-primary">上传</button>
-                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('uploadModal').style.display='none'">取消</button>
+                            <button type="button" class="btn btn-secondary" onclick="resetUploadModal()">取消</button>
                         </div>
                         <div id="uploadProgress" class="progress-container">
                             <div class="progress-bar">
