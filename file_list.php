@@ -258,7 +258,7 @@ class FileListModule {
                     </div>
                     <div class="user-info">
                         <span>👤 <?php echo $username; ?></span>
-                        <a href="?logout" class="logout-btn" onclick="return confirm('确定要退出吗？')">登出</a>
+                        <a href="<?php echo substr($_SERVER["REQUEST_URI"], 0, strlen($_SERVER["SCRIPT_NAME"])); ?>?logout" class="logout-btn" onclick="return confirm('确定要退出吗？')">登出</a>
                     </div>
                 </div>
             </header>

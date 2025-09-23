@@ -1,89 +1,48 @@
 <?php
 /**
- * 统一登出处理文件
- * 清除WebDAV和后台管理的所有登录状态
+ * 登出处理文件 - 美观版本
+ * 清除所有登录状态，显示友好的登出成功页面
  */
 
-// 启动会话
 session_start();
-
-// 清除所有会话数据
-$_SESSION = array();
-
-// 销毁会话
-if (ini_get("session.use_cookies")) {
-    $params = session_get_cookie_params();
-    setcookie(session_name(), '', time() - 42000,
-        $params["path"], $params["domain"],
-        $params["secure"], $params["httponly"]
-    );
-}
+$_SESSION = [];
 session_destroy();
 
-// 强制清除HTTP基本认证
-// 发送401状态码强制浏览器清除认证缓存
-if (isset($_SERVER['PHP_AUTH_USER']) || isset($_SERVER['HTTP_AUTHORIZATION'])) {
-    // 对于WebDAV基本认证，需要发送401来清除浏览器缓存
-    header('WWW-Authenticate: Basic realm="WebDAV Server"');
-    header('HTTP/1.1 401 Unauthorized');
-    
-    // 但是立即重定向到登出成功页面，避免用户看到401页面
-    header('Refresh: 0; url=logout.php?cleared=1');
-    exit;
-}
+setcookie(session_name(), '', time() - 42000, '/');
 
-// 处理认证清除后的重定向
-if (isset($_GET['cleared'])) {
-    // 认证已清除，显示成功页面
-    // 清除可能的认证缓存
-    header('Cache-Control: no-cache, no-store, must-revalidate');
-    header('Pragma: no-cache');
-    header('Expires: 0');
-    
-    // 显示登出成功页面
-    // 继续执行下面的HTML代码
-} else {
-    // 第一次访问，需要清除认证
-    // 强制清除HTTP基本认证
-    
-    // 设置不同的realm来确保浏览器清除缓存
-    header('WWW-Authenticate: Basic realm="Logged Out ' . time() . '"');
-    header('HTTP/1.1 401 Unauthorized');
-    
-    // 添加JavaScript来进一步确保清除
-    echo '<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>正在清除认证...</title>
-    <meta http-equiv="refresh" content="1;url=logout.php?cleared=1">
-    <script>
-        // 尝试通过AJAX请求来清除认证
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", "webdav.php", true);
-        xhr.setRequestHeader("Authorization", "Basic " + btoa("logout:logout"));
-        xhr.send();
-        
-        // 重定向到成功页面
-        setTimeout(function() {
-            window.location.href = "logout.php?cleared=1";
-        }, 500);
-    </script>
-</head>
-<body>
-    <p>正在清除登录状态，请稍候...</p>
-</body>
-</html>';
-    exit;
-}
+isset($_SERVER['PHP_AUTH_USER']) && header('HTTP/1.1 401 Unauthorized');
+
+header('Cache-Control: no-cache');
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>已安全退出 - WebDAV系统</title>
+    <title>登出成功 - 泰格网盘</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        :root {
+            --primary-color: #007bff;
+            --primary-dark: #0056b3;
+            --success-color: #28a745;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -91,7 +50,7 @@ if (isset($_GET['cleared'])) {
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -102,45 +61,67 @@ if (isset($_GET['cleared'])) {
         
         .logout-container {
             background: white;
-            padding: 50px 40px;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 60px 50px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
             text-align: center;
-            max-width: 450px;
+            max-width: 500px;
             width: 100%;
-            animation: fadeIn 0.5s ease-in;
+            animation: fadeInUp 0.6s ease-out;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .success-icon {
-            font-size: 72px;
-            color: #4CAF50;
-            margin-bottom: 20px;
-            animation: bounce 0.6s ease-in-out;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--success-color), #20c997);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            animation: scaleIn 0.5s ease-out;
         }
         
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
+        .success-icon i {
+            font-size: 40px;
+            color: white;
+        }
+        
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
         
         h1 {
-            color: #333;
-            margin-bottom: 15px;
+            color: var(--dark-color);
             font-size: 28px;
             font-weight: 600;
+            margin-bottom: 15px;
+            line-height: 1.3;
         }
         
         .description {
-            color: #666;
-            margin-bottom: 35px;
-            line-height: 1.6;
+            color: var(--text-muted);
             font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 40px;
         }
         
         .button-group {
@@ -151,59 +132,58 @@ if (isset($_GET['cleared'])) {
         }
         
         .btn {
-            display: inline-block;
             padding: 14px 28px;
-            text-decoration: none;
+            border: none;
             border-radius: 8px;
             font-weight: 500;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            border: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
             cursor: pointer;
-            min-width: 150px;
+            font-size: 15px;
+            min-width: 140px;
+            justify-content: center;
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #007bff, #0056b3);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
             color: white;
-            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+            box-shadow: var(--shadow-sm);
         }
         
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,123,255,0.4);
-        }
-        
-        .btn-secondary {
-            background: linear-gradient(135deg, #28a745, #1e7e34);
-            color: white;
-            box-shadow: 0 4px 15px rgba(40,167,69,0.3);
-        }
-        
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40,167,69,0.4);
+            box-shadow: var(--shadow-md);
         }
         
         .btn-outline {
             background: transparent;
-            color: #007bff;
-            border: 2px solid #007bff;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
         }
         
         .btn-outline:hover {
-            background: #007bff;
+            background: var(--primary-color);
             color: white;
             transform: translateY(-2px);
         }
         
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--text-muted), #495057);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
         @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-            
             .logout-container {
-                padding: 40px 25px;
+                padding: 40px 30px;
                 margin: 10px;
             }
             
@@ -221,33 +201,83 @@ if (isset($_GET['cleared'])) {
                 max-width: 250px;
             }
         }
+        
+        /* 额外的动画效果 */
+        .logout-container > * {
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 <body>
     <div class="logout-container">
-        <div class="success-icon">✅</div>
-        <h1>已安全退出</h1>
-        <p class="description">您已成功退出WebDAV文件管理和后台管理系统。<br>您的登录会话已完全清除。</p>
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        
+        <h1>登出成功</h1>
+        <p class="description">
+            您已成功退出泰格网盘系统。<br>
+            您的登录会话已完全清除，现在可以安全地关闭浏览器。
+        </p>
         
         <div class="button-group">
-            <a href="webdav.php" class="btn btn-primary">重新登录WebDAV</a>
-            <a href="admin/" class="btn btn-secondary">后台管理</a>
-            <a href="login.php" class="btn btn-outline">返回首页</a>
+            <a href="index.php" class="btn btn-primary">
+                <i class="fas fa-home"></i>
+                返回首页
+            </a>
+            
+            <a href="login.php" class="btn btn-outline">
+                <i class="fas fa-sign-in-alt"></i>
+                重新登录
+            </a>
+            
+            <a href="webdav.php" class="btn btn-secondary">
+                <i class="fas fa-folder-open"></i>
+                WebDAV服务
+            </a>
         </div>
     </div>
 
     <script>
-        // 额外清除浏览器认证缓存
+        // 防止页面被缓存
         if (window.history.replaceState) {
-            window.history.replaceState(null, null, 'logout.php');
+            window.history.replaceState(null, null, window.location.href);
         }
         
-        // 防止后退按钮重新认证
+        // 防止后退按钮导致重新认证
         window.onpageshow = function(event) {
             if (event.persisted) {
                 window.location.reload();
             }
         };
+        
+        // 添加按钮点击动画
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                // 创建涟漪效果
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple');
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
     </script>
 </body>
 </html>
