@@ -95,11 +95,6 @@ if ($isAdmin) {
                     $stmt = $pdo->prepare('INSERT INTO users (username, password, is_admin, access_dir) VALUES (?, ?, 0, ?)');
                     $stmt->execute([$username, $hashedPassword, $accessDir]);
                     
-                    // 创建用户目录
-                    $userPath = __DIR__ . '/../storage/' . $accessDir;
-                    if (!is_dir($userPath)) {
-                        mkdir($userPath, 0755, true);
-                    }
                     
                     $response['success'] = true;
                     $response['message'] = '用户添加成功';
@@ -156,13 +151,6 @@ if ($isAdmin) {
                         $stmt = $pdo->prepare('INSERT INTO users (username, password, is_admin, access_dir) VALUES (?, ?, 0, ?)');
                         $stmt->execute([$username, $hashedPassword, $accessDir]);
                         
-                        // 创建用户目录
-                        $userPath = __DIR__ . '/../storage/' . $accessDir;
-                        if (!is_dir($userPath)) {
-                            if (!mkdir($userPath, 0755, true)) {
-                                throw new Exception("无法创建目录: {$accessDir}");
-                            }
-                        }
                         
                         $addedCount++;
                     } catch (Exception $e) {
