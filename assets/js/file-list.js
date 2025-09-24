@@ -140,7 +140,7 @@ function previewTextFile(filename) {
                     
                     document.getElementById('previewFileName').textContent = fileName;
                     document.getElementById('downloadPreviewBtn').onclick = function() {
-                        window.location.href = 'download.php?file=' + encodeURIComponent(filename);
+                        window.location.href = '?download=' + encodeURIComponent(filename);
                     };
                     
                     const contentDiv = document.getElementById('previewContent');

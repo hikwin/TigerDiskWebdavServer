@@ -284,7 +284,7 @@ class FileListModule {
                         </div>
                     <?php else: ?>
                         <?php foreach ($directories as $dir): ?>
-                            <a href="<?php echo htmlspecialchars($webdavBaseUrl . '/' . ($webPath ? $webPath . '/' : '') . $dir['name'] . '/'); ?>" class="file-item">
+                            <a href="<?php echo htmlspecialchars($webdavBaseUrl . '/' . ($webPath ? $webPath . '/' : '') . $dir['name'] . ''); ?>" class="file-item">
                                 <div class="file-icon">📁</div>
                                 <div class="file-info">
                                     <div class="file-name"><?php echo htmlspecialchars($dir['name']); ?></div>

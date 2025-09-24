@@ -47,6 +47,18 @@ class WebDAVServer {
     
     public function handle() {
         try {
+            // 处理登出请求 - 现在重定向到统一登出页面
+            if (isset($_GET['logout'])) {
+                header('Location: ./logout.php');
+                exit;
+            }
+            
+            // 处理身份验证 - 修复版本
+            if (!$this->authenticateFixed()) {
+                $this->sendUnauthorized();
+                return;
+            }
+            
             // 处理文件上传请求
             if (isset($_POST['upload']) && isset($_FILES['file'])) {
                 $this->handleFileUpload();
@@ -182,18 +194,6 @@ class WebDAVServer {
                 } catch (Exception $e) {
                     echo json_encode(['success' => false, 'message' => '删除文件失败: ' . $e->getMessage()]);
                 }
-                return;
-            }
-            
-            // 处理登出请求 - 现在重定向到统一登出页面
-            if (isset($_GET['logout'])) {
-                header('Location: ./logout.php');
-                exit;
-            }
-            
-            // 处理身份验证 - 修复版本
-            if (!$this->authenticateFixed()) {
-                $this->sendUnauthorized();
                 return;
             }
             
