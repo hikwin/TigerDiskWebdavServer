@@ -63,7 +63,7 @@ if (($_GET['action'] ?? '') === 'logout') {
 }
 
 // 获取WebDAV访问URL
-$protocol = (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] ?? '') === 'on') ? 'https' : 'http';
+$protocol = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'] ?? '';
 $webdavUrl = $protocol . '://' . $host . rtrim(dirname($_SERVER['PHP_SELF'] ?? ''), '/') . '/webdav.php';
 ?>

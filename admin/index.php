@@ -396,7 +396,7 @@ if ($isLoggedIn) {
 // 生成WebDAV URL
 $webdavUrl = '';
 if ($isLoggedIn) {
-    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+    $protocol = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? '';
     
     // 获取当前脚本所在目录的相对路径，然后从admin目录退回到父目录

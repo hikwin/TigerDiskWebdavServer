@@ -359,7 +359,7 @@ class WebDAVServer {
         
         // 检查当前用户是否为管理员
         $isAdmin = false;
-        if ($this->currentUser && isset($this->currentUser['is_admin'])) {
+        if ($this->currentUser && !empty($this->currentUser['is_admin'])) {
             $isAdmin = (bool)$this->currentUser['is_admin'];
         }
         
@@ -473,7 +473,7 @@ class WebDAVServer {
     }
     
     private function handleFileUpload() {
-        if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+        if (!isset($_FILES['file']) || ($_FILES['file']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
             echo json_encode(['success' => false, 'message' => '文件上传失败']);
             return;
         }
@@ -511,14 +511,17 @@ class WebDAVServer {
     
     private function handleCopy($path) {
         $source = $this->getRealPath($path);
-        $destination = $this->getRealPath($_SERVER['HTTP_DESTINATION'] ?? '');
+        $destinationPath = parse_url($_SERVER['HTTP_DESTINATION'] ?? '', PHP_URL_PATH);
+        $scriptName = basename($_SERVER['SCRIPT_NAME'] ?? $_SERVER['PHP_SELF'] ?? '');
+        $relativePath = ltrim(substr($destinationPath, strpos($destinationPath, $scriptName) + strlen($scriptName)), '/');
+        $destination = $this->getRealPath(urldecode($relativePath));
         
         if (!file_exists($source) || !$destination) {
             $this->sendResponse(404, 'Not Found');
             return;
         }
         
-        if (file_exists($destination) && ($_SERVER['HTTP_OVERWRITE'] ?? 'F') !== 'T') {
+        if (file_exists($destination) && strtoupper($_SERVER['HTTP_OVERWRITE'] ?? 'F') !== 'T') {
             $this->sendResponse(412, 'Precondition Failed');
             return;
         }
@@ -532,14 +535,17 @@ class WebDAVServer {
     
     private function handleMove($path) {
         $source = $this->getRealPath($path);
-        $destination = $this->getRealPath($_SERVER['HTTP_DESTINATION'] ?? '');
+        $destinationPath = parse_url($_SERVER['HTTP_DESTINATION'] ?? '', PHP_URL_PATH);
+        $scriptName = basename($_SERVER['SCRIPT_NAME'] ?? $_SERVER['PHP_SELF'] ?? '');
+        $relativePath = ltrim(substr($destinationPath, strpos($destinationPath, $scriptName) + strlen($scriptName)), '/');
+        $destination = $this->getRealPath(urldecode($relativePath));
         
         if (!file_exists($source) || !$destination) {
             $this->sendResponse(404, 'Not Found');
             return;
         }
         
-        if (file_exists($destination) && ($_SERVER['HTTP_OVERWRITE'] ?? 'F') !== 'T') {
+        if (file_exists($destination) && strtoupper($_SERVER['HTTP_OVERWRITE'] ?? 'F') !== 'T') {
             $this->sendResponse(412, 'Precondition Failed');
             return;
         }
@@ -553,7 +559,7 @@ class WebDAVServer {
     
     private function handlePropfind($path) {
         $realPath = $this->getRealPath($path);
-        $depth = $_SERVER['HTTP_DEPTH'] ?? '1';
+        $depth = $_SERVER['HTTP_DEPTH'] ?? 'infinity';
         
         if (!file_exists($realPath)) {
             $this->sendResponse(404, 'Not Found');
@@ -644,11 +650,11 @@ class WebDAVServer {
         }
         
         // 获取webdav-access的基础URL（不包含index.php）
-        $scriptPath = $_SERVER['SCRIPT_NAME'] ?? '';
+        $scriptPath = $_SERVER['SCRIPT_NAME'] ?? $_SERVER['PHP_SELF'] ?? '';
         $basePath = dirname($scriptPath);
         $basePath = rtrim($basePath, '/') . '/';
-        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'] ?? '';
+        $protocol = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
         $webdavBase = rtrim($protocol . '://' . $host . $basePath, '/');
         
         foreach ($items as $item) {
