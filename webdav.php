@@ -48,7 +48,7 @@ class WebDAVServer {
     public function handle() {
         try {
             // 处理登出请求 - 现在重定向到统一登出页面
-            if (isset($_GET['logout'])) {
+            if (($_GET['logout'] ?? null) !== null) {
                 header('Location: ./logout.php');
                 exit;
             }
@@ -60,14 +60,14 @@ class WebDAVServer {
             }
             
             // 处理文件上传请求
-            if (isset($_POST['upload']) && isset($_FILES['file'])) {
+            if ((($_POST['upload'] ?? null) !== null) && (($_FILES['file'] ?? null) !== null)) {
                 $this->handleFileUpload();
                 return;
             }
             
             // 处理文件下载请求
-            if (isset($_GET['download'])) {
-                $filePath = $_GET['download'];
+            if (($_GET['download'] ?? null) !== null) {
+                $filePath = $_GET['download'] ?? '';
                 $realPath = $this->getRealPath($filePath);
                 
                 if (!file_exists($realPath) || is_dir($realPath)) {
@@ -80,8 +80,8 @@ class WebDAVServer {
             }
             
             // 处理文件大小检查请求
-            if (isset($_GET['check_size'])) {
-                $filePath = $_GET['check_size'];
+            if (($_GET['check_size'] ?? null) !== null) {
+                $filePath = $_GET['check_size'] ?? '';
                 $realPath = $this->getRealPath($filePath);
                 
                 if (!file_exists($realPath) || is_dir($realPath)) {
@@ -94,8 +94,8 @@ class WebDAVServer {
             }
             
             // 处理文件预览请求
-            if (isset($_GET['preview'])) {
-                $filePath = $_GET['preview'];
+            if (($_GET['preview'] ?? null) !== null) {
+                $filePath = $_GET['preview'] ?? '';
                 $realPath = $this->getRealPath($filePath);
                 
                 if (!file_exists($realPath) || is_dir($realPath)) {
@@ -125,7 +125,7 @@ class WebDAVServer {
             }
             
             // 处理上传配置获取请求
-            if (isset($_GET['get_upload_config'])) {
+            if (($_GET['get_upload_config'] ?? null) !== null) {
                 header('Content-Type: application/json; charset=utf-8');
                 
                 // 获取PHP上传限制配置
@@ -175,8 +175,8 @@ class WebDAVServer {
             }
             
             // 处理文件删除请求
-            if (isset($_POST['delete'])) {
-                $filePath = $_POST['delete'];
+            if (($_POST['delete'] ?? null) !== null) {
+                $filePath = $_POST['delete'] ?? '';
                 $realPath = $this->getRealPath($filePath);
                 
                 if (!file_exists($realPath)) {
@@ -197,7 +197,7 @@ class WebDAVServer {
                 return;
             }
             
-            $method = $_SERVER['REQUEST_METHOD'];
+            $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
             $path = $this->getPath();
             
             switch ($method) {
@@ -250,26 +250,26 @@ class WebDAVServer {
         $password = null;
         
         // 方法1: 标准PHP_AUTH
-        if (isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW'])) {
+        if ((($_SERVER['PHP_AUTH_USER'] ?? null) !== null) && (($_SERVER['PHP_AUTH_PW'] ?? null) !== null)) {
             $username = $_SERVER['PHP_AUTH_USER'];
             $password = $_SERVER['PHP_AUTH_PW'];
         }
         // 方法2: HTTP_AUTHORIZATION头
-        elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+        elseif ((($_SERVER['HTTP_AUTHORIZATION'] ?? null) !== null)) {
             $auth = $_SERVER['HTTP_AUTHORIZATION'];
             if (preg_match('/Basic\s+(.*)$/i', $auth, $matches)) {
                 list($username, $password) = explode(':', base64_decode($matches[1]));
             }
         }
         // 方法3: REDIRECT_HTTP_AUTHORIZATION头
-        elseif (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+        elseif ((($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? null) !== null)) {
             $auth = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
             if (preg_match('/Basic\s+(.*)$/i', $auth, $matches)) {
                 list($username, $password) = explode(':', base64_decode($matches[1]));
             }
         }
         // 方法4: Apache环境下通过SetEnvIf设置的HTTP_AUTHORIZATION
-        elseif (isset($_SERVER['HTTP_AUTHORIZATION']) && preg_match('/Basic\s+(.*)$/i', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
+        elseif (((($_SERVER['HTTP_AUTHORIZATION'] ?? null) !== null)) && preg_match('/Basic\s+(.*)$/i', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
             list($username, $password) = explode(':', base64_decode($matches[1]));
         }
         
@@ -283,7 +283,7 @@ class WebDAVServer {
                     
                     if ($user && password_verify($password, $user['password'])) {
                         $this->currentUser = $user;
-                        $this->userDir = $user['access_dir'] ?: $username;
+                        $this->userDir = $user['access_dir'] ?? $username;
                         $this->authenticated = true;
                         return true;
                     }
@@ -315,12 +315,12 @@ class WebDAVServer {
     
     // 其余方法保持不变...
     private function getPath() {
-        $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '';
         $path = urldecode($path);
         $path = ltrim($path, '/');
         
         // 获取当前脚本的路径
-        $scriptPath = $_SERVER['SCRIPT_NAME'];
+        $scriptPath = $_SERVER['SCRIPT_NAME'] ?? $_SERVER['PHP_SELF'] ?? '';
         $scriptDir = dirname($scriptPath);
         $scriptName = basename($scriptPath);
         
@@ -518,7 +518,7 @@ class WebDAVServer {
             return;
         }
         
-        if (file_exists($destination) && !isset($_SERVER['HTTP_OVERWRITE']) || $_SERVER['HTTP_OVERWRITE'] !== 'T') {
+        if (file_exists($destination) && ($_SERVER['HTTP_OVERWRITE'] ?? 'F') !== 'T') {
             $this->sendResponse(412, 'Precondition Failed');
             return;
         }
@@ -539,7 +539,7 @@ class WebDAVServer {
             return;
         }
         
-        if (file_exists($destination) && !isset($_SERVER['HTTP_OVERWRITE']) || $_SERVER['HTTP_OVERWRITE'] !== 'T') {
+        if (file_exists($destination) && ($_SERVER['HTTP_OVERWRITE'] ?? 'F') !== 'T') {
             $this->sendResponse(412, 'Precondition Failed');
             return;
         }
@@ -570,7 +570,7 @@ class WebDAVServer {
         $xml = '<?xml version="1.0" encoding="utf-8"?>
 <d:multistatus xmlns:d="DAV:">
   <d:response>
-    <d:href>' . htmlspecialchars($_SERVER['REQUEST_URI']) . '</d:href>
+    <d:href>' . htmlspecialchars($_SERVER['REQUEST_URI'] ?? '') . '</d:href>
     <d:propstat>
       <d:prop/>
       <d:status>HTTP/1.1 200 OK</d:status>
@@ -644,11 +644,11 @@ class WebDAVServer {
         }
         
         // 获取webdav-access的基础URL（不包含index.php）
-        $scriptPath = $_SERVER['SCRIPT_NAME'];
+        $scriptPath = $_SERVER['SCRIPT_NAME'] ?? '';
         $basePath = dirname($scriptPath);
         $basePath = rtrim($basePath, '/') . '/';
         $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'];
+        $host = $_SERVER['HTTP_HOST'] ?? '';
         $webdavBase = rtrim($protocol . '://' . $host . $basePath, '/');
         
         foreach ($items as $item) {
@@ -758,6 +758,6 @@ class WebDAVServer {
 }
 
 // 使用配置
-$config = require __DIR__ . '../config.php';
-$webdav = new WebDAVServer($config['base_dir'], $config['users']);
+$config = require __DIR__ . '/config.php';
+$webdav = new WebDAVServer($config['base_dir'] ?? './webdav', $config['users'] ?? []);
 $webdav->handle();

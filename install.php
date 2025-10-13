@@ -38,7 +38,7 @@ foreach ($checkDirs as $dir) {
 $errors = [];
 $success = false;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     // 验证表单数据
     $username = isset($_POST['username']) ? trim($_POST['username']) : '';
     $password = isset($_POST['password']) ? trim($_POST['password']) : '';
@@ -235,7 +235,7 @@ $defaultBaseDir = 'storage/' . generateRandomString(16);
                 <h2>管理员账号设置</h2>
                 <div>
                     <label for="username">管理员用户名：</label>
-                    <input type="text" id="username" name="username" value="<?php echo isset($username) ? htmlspecialchars($username) : ''; ?>" required>
+                    <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($username ?? ''); ?>" required>
                 </div>
                 
                 <div>

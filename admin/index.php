@@ -35,7 +35,7 @@ try {
 
 
 // 处理退出登录
-if (isset($_GET['action']) && $_GET['action'] === 'logout') {
+if (($_GET['action'] ?? '') === 'logout') {
     session_destroy();
     header('Location: index.php');
     exit;
@@ -43,7 +43,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 
 // 检查是否已登录
 $isLoggedIn = isset($_SESSION['user_id']);
-$isAdmin = $isLoggedIn && isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1;
+$isAdmin = $isLoggedIn && ($_SESSION['is_admin'] ?? 0) == 1;
 
 // 如果未登录，跳转到登录页面
 if (!$isLoggedIn) {
@@ -69,7 +69,7 @@ foreach ($messageTypes as $type) {
 // 处理用户管理操作（仅管理员）
 if ($isAdmin) {
     // 添加用户 - 改为AJAX处理
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_user') {
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['action'] ?? '') === 'add_user') {
         $username = isset($_POST['username']) ? trim($_POST['username']) : '';
         $password = isset($_POST['password']) ? trim($_POST['password']) : '';
         $accessDir = isset($_POST['access_dir']) ? trim($_POST['access_dir']) : '';
@@ -112,7 +112,7 @@ if ($isAdmin) {
     }
 
     // 批量添加用户
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'batch_add_users') {
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['action'] ?? '') === 'batch_add_users') {
         $usernames = isset($_POST['usernames']) ? json_decode($_POST['usernames'], true) : [];
         $password = isset($_POST['password']) ? trim($_POST['password']) : '';
         
@@ -229,7 +229,7 @@ if ($isAdmin) {
     }
     
     // 删除用户
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_user') {
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['action'] ?? '') === 'delete_user') {
         $userId = isset($_POST['user_id']) ? (int)$_POST['user_id'] : 0;
         
         if ($userId > 0) {
@@ -247,7 +247,7 @@ if ($isAdmin) {
     }
     
     // 修改用户密码
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'change_user_password') {
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['action'] ?? '') === 'change_user_password') {
         $userId = isset($_POST['user_id']) ? (int)$_POST['user_id'] : 0;
         $newPassword = isset($_POST['new_password']) ? trim($_POST['new_password']) : '';
         
@@ -267,7 +267,7 @@ if ($isAdmin) {
     }
     
     // 修改用户访问目录
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'change_access_dir') {
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['action'] ?? '') === 'change_access_dir') {
         $userId = isset($_POST['user_id']) ? (int)$_POST['user_id'] : 0;
         $accessDir = isset($_POST['access_dir']) ? trim($_POST['access_dir']) : '';
         
@@ -296,7 +296,7 @@ if ($isAdmin) {
 // 处理个人信息修改
 if ($isLoggedIn) {
     // 修改密码
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'change_own_password') {
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['action'] ?? '') === 'change_own_password') {
         $currentPassword = isset($_POST['current_password']) ? trim($_POST['current_password']) : '';
         $newPassword = isset($_POST['new_password']) ? trim($_POST['new_password']) : '';
         $confirmPassword = isset($_POST['confirm_password']) ? trim($_POST['confirm_password']) : '';
@@ -327,7 +327,7 @@ if ($isLoggedIn) {
     }
     
     // 修改用户名
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'change_username') {
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['action'] ?? '') === 'change_username') {
         $newUsername = isset($_POST['new_username']) ? trim($_POST['new_username']) : '';
         $password = isset($_POST['password']) ? trim($_POST['password']) : '';
         
@@ -364,8 +364,8 @@ if ($isLoggedIn) {
 // 获取数据
 $users = [];
 $totalUsers = 0;
-$currentPage = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$perPage = isset($_GET['per_page']) ? max(1, intval($_GET['per_page'])) : 10;
+$currentPage = max(1, intval($_GET['page'] ?? 1));
+$perPage = max(1, intval($_GET['per_page'] ?? 10));
 
 if ($isAdmin) {
     // 获取总数
@@ -396,11 +396,11 @@ if ($isLoggedIn) {
 // 生成WebDAV URL
 $webdavUrl = '';
 if ($isLoggedIn) {
-    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-    $host = $_SERVER['HTTP_HOST'];
+    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? '';
     
     // 获取当前脚本所在目录的相对路径，然后从admin目录退回到父目录
-    $scriptDir = dirname($_SERVER['SCRIPT_NAME']);
+    $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
     $baseDir = dirname($scriptDir); // 从admin目录退回到webdav.php所在的目录
     
     // 构建webdav.php的完整URL路径
@@ -428,7 +428,7 @@ if ($isLoggedIn) {
                 <div>
                     <h1>WebDAV 管理后台</h1>
                     <p style="margin: 0; color: var(--gray-600);">
-                        欢迎回来，<strong><?php echo htmlspecialchars($_SESSION['username']); ?></strong>
+                        欢迎回来，<strong><?php echo htmlspecialchars($_SESSION['username'] ?? ''); ?></strong>
                     </p>
                 </div>
                 <div style="display: flex; gap: 1rem; align-items: center;">
@@ -577,7 +577,7 @@ if ($isLoggedIn) {
                                             <tr>
                                                 <td><?php echo $user['id']; ?></td>
                                                 <td><?php echo htmlspecialchars($user['username']); ?></td>
-                                                <td><?php echo htmlspecialchars($user['access_dir'] ?: $user['username']); ?></td>
+                                                <td><?php echo htmlspecialchars($user['access_dir'] ?? $user['username']); ?></td>
                                                 <td class="hide-mobile"><?php echo $user['created_at']; ?></td>
                                                 <td>
                                                     <div style="display: flex; gap: 0.5rem;">
@@ -648,7 +648,7 @@ if ($isLoggedIn) {
                                 <tr>
                                     <th>用户名</th>
                                     <td>
-                                        <code id="webdav-username"><?php echo htmlspecialchars($_SESSION['username']); ?></code>
+                                        <code id="webdav-username"><?php echo htmlspecialchars($_SESSION['username'] ?? ''); ?></code>
                                         <button type="button" class="btn btn-sm btn-secondary copy-btn" data-target="webdav-username" style="margin-left: 0.5rem;">
                                             复制
                                         </button>
@@ -677,7 +677,7 @@ if ($isLoggedIn) {
                                                 管理员可访问所有用户的目录
                                             </small>
                                         <?php else: ?>
-                                            <code><?php echo htmlspecialchars($currentUser['access_dir'] ?: $_SESSION['username']); ?></code>
+                                            <code><?php echo htmlspecialchars($currentUser['access_dir'] ?? ($_SESSION['username'] ?? '')); ?></code>
                                             <small style="display: block; margin-top: 0.25rem; color: var(--gray-600);">
                                                 仅能访问此目录下的文件
                                             </small>

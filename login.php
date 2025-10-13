@@ -30,9 +30,9 @@ $isLoggedIn = isset($_SESSION['user_id']);
 
 // 处理登录
 $loginError = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'login') {
-    $username = isset($_POST['username']) ? trim($_POST['username']) : '';
-    $password = isset($_POST['password']) ? trim($_POST['password']) : '';
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['action'] ?? '') === 'login') {
+    $username = trim($_POST['username'] ?? '');
+    $password = trim($_POST['password'] ?? '');
     
     if (!empty($username) && !empty($password)) {
         $stmt = $pdo->prepare('SELECT * FROM users WHERE username = ? LIMIT 1');
@@ -57,15 +57,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 
 // 处理退出登录 - 使用统一登出页面
-if (isset($_GET['action']) && $_GET['action'] === 'logout') {
+if (($_GET['action'] ?? '') === 'logout') {
     header('Location: logout.php');
     exit;
 }
 
 // 获取WebDAV访问URL
-$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-$host = $_SERVER['HTTP_HOST'];
-$webdavUrl = $protocol . '://' . $host . rtrim(dirname($_SERVER['PHP_SELF']), '/') . '/webdav.php';
+$protocol = (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] ?? '') === 'on') ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'] ?? '';
+$webdavUrl = $protocol . '://' . $host . rtrim(dirname($_SERVER['PHP_SELF'] ?? ''), '/') . '/webdav.php';
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -368,11 +368,11 @@ $webdavUrl = $protocol . '://' . $host . rtrim(dirname($_SERVER['PHP_SELF']), '/
             <div class="login-header">
                 <i class="fas fa-check-circle"></i>
                 <h1>已登录</h1>
-                <p>欢迎回来，<?php echo htmlspecialchars($_SESSION['username']); ?>！</p>
+                <p>欢迎回来，<?php echo htmlspecialchars($_SESSION['username'] ?? ''); ?>！</p>
             </div>
             <div class="login-form">
                 <div class="additional-links">
-                    <?php if ($_SESSION['is_admin'] == 1): ?>
+                    <?php if (($_SESSION['is_admin'] ?? 0) == 1): ?>
                         <a href="admin/">
                             <i class="fas fa-cog"></i> 管理后台
                         </a>

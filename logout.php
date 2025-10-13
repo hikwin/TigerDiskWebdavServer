@@ -10,7 +10,7 @@ session_destroy();
 
 setcookie(session_name(), '', time() - 42000, '/');
 
-isset($_SERVER['PHP_AUTH_USER']) && header('HTTP/1.1 401 Unauthorized');
+($_SERVER['PHP_AUTH_USER'] ?? null) && header('HTTP/1.1 401 Unauthorized');
 
 header('Cache-Control: no-cache');
 ?>
